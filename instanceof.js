@@ -116,3 +116,68 @@ if (!Object.create) {
 // Этим "другим объектом" является объект, на который указывает свойство .prototype функции, вызванной с new. 
 // Функции, вызываемые с new, часто называют "конструкторами", несмотря на то что они не создают экземпляры классов,
 //  как это делают конструкторы в традиционных класс-ориентированных языках.
+
+
+
+// Вспомните абстрактный пример Foo / Bar / b1, который мы рассматривали ранее в этой главе:
+
+function Foo() { /* .. */ }
+Foo.prototype...
+
+function Bar() { /* .. */ }
+Bar.prototype = Object.create( Foo.prototype );
+
+var b1 = new Bar( "b1" );
+// Вот список проверок, которые вам придется выполнить для интроспекции 
+// типов этих сущностей с помощью семантики instanceof и .prototype:
+
+// устанавливаем связь между `Foo` и `Bar`
+Bar.prototype instanceof Foo; // true
+Object.getPrototypeOf( Bar.prototype ) === Foo.prototype; // true
+Foo.prototype.isPrototypeOf( Bar.prototype ); // true
+
+// устанавливаем связь между `b1` и `Foo` и `Bar`
+b1 instanceof Foo; // true
+b1 instanceof Bar; // true
+Object.getPrototypeOf( b1 ) === Bar.prototype; // true
+Foo.prototype.isPrototypeOf( b1 ); // true
+Bar.prototype.isPrototypeOf( b1 ); // true
+
+
+// Еще один распространенный, но возможно менее надежный метод интроспекции типов, 
+// который многие разработчики предпочитают оператору instanceof, называется 
+// "утиная типизация". Этот термин берет свое начало из афоризма 
+// "если нечто выглядит как утка и крякает как утка, то возможно это и есть утка".
+
+// Пример:
+
+if (a1.something) {
+	a1.something();
+}
+
+
+// Возвращаясь к коду в стиле OLOO отметим, что интроспекция типов в данном 
+// случае может быть гораздо элегантнее. Давайте вспомним фрагмент OLOO 
+// кода Foo / Bar / b1, рассмотренный ранее в этой главе:
+
+var Foo = { /* .. */ };
+
+var Bar = Object.create( Foo );
+Bar...
+
+var b1 = Object.create( Bar );
+// Поскольку в OLOO у нас есть лишь обычные объекты, связанные 
+// делегированием [[Prototype]], мы можем использовать гораздо более простую форму интроспекции типов:
+
+// устанавливаем связь между `Foo` и `Bar`
+Foo.isPrototypeOf( Bar ); // true
+Object.getPrototypeOf( Bar ) === Foo; // true
+
+// устанавливаем связь между `b1` и `Foo` и `Bar`
+Foo.isPrototypeOf( b1 ); // true
+Bar.isPrototypeOf( b1 ); // true
+Object.getPrototypeOf( b1 ) === Bar; // true
+// Мы больше не используем instanceof, потому что он претендует на то, что каким-то 
+// образом связан с классами. Теперь мы просто задаем (неформальный) вопрос 
+// "являешься ли ты моим прототипом?" Больше не нужны косвенные обращения, 
+// такие как Foo.prototype или ужасно многословное Foo.prototype.isPrototypeOf(..).
